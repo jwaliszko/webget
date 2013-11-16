@@ -6,7 +6,7 @@ namespace webget
 {
     internal static class ContentParser
     {
-        public const string FromLink = @"<a href=""(?<uri>.*?)""";
+        public const string FromLink = @"href=""(?<uri>.*?)""";
         public const string FromSrc = @"src=""(?<uri>.*?)""";
 
         public static string[] ExtractUris(string html)
