@@ -4,11 +4,11 @@
 webget: get files from web
 usage: webget [options]... [url]...
 
-example: webget -e mp3,ogg http://www.astronomycast.com/archive/
+example: webget -e mp3,aac http://www.astronomycast.com/archive/
 
 options:
   -e, --extensions=LIST                         comma-separated list of accepted extensions
-  -p, --proxy-settings=(user:pass@)ip(:port)    proxy settings if required
+  -p, --proxy-settings=(user:pass@)ip(:port)    proxy settings (if required)
   -s, --save-directory=PATH                     download directory
   -r, --recursion-depth=LEVEL                   max recursion depth - default: 0, infinity: -1
   -u, --user-agent=NAME                         User-Agent HTTP field spoof value,

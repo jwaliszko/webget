@@ -11,45 +11,65 @@ namespace webget
         public ProxySettings ProxyData { get; set; }
         public string UserAgent { get; set; }
         
-        public void Execute(string source, string[] extensions, string directory, int maxDepth)
+        public void Execute(string uri, string[] extensions, string directory, int maxDepth)
         {
             using (var client = new NetClient {ProxyData = ProxyData, Encoding = Encoding.UTF8, UserAgent = UserAgent})
             {
-                ExecuteInternal(client, source, extensions, directory, maxDepth);
+                ExecuteInternal(client, uri, extensions, directory, maxDepth);
             }
         }
 
-        private void ExecuteInternal(WebClient client, string source, string[] extensions, string directory,
+        private void ExecuteInternal(WebClient client, string uri, string[] extensions, string directory,
                                      int maxDepth, int currentDepth = 0)
         {
-            var content = client.DownloadString(source);
-            var resources = ContentParser.ExtractUris(content)
-                                         .Where(x => x.EndsWithAny(extensions))
-                                         .Select(x => x.ToAbsoluteUri(source)).ToArray();
+            var content = DownloadString(client, uri, currentDepth);
+            if (!string.IsNullOrEmpty(content))
+            {                
+                var resources = ContentParser.ExtractUris(content)
+                                             .Where(x => x.EndsWithAny(extensions))
+                                             .Select(x => x.ToAbsoluteUri(uri)).ToArray();
+                var currentDirectory = PrepareDirectory(directory, currentDepth);
+                DownloadFiles(client, resources, currentDirectory);
 
+                if (maxDepth < 0 || currentDepth < maxDepth)
+                {
+                    var sites = ContentParser.ExtractUris(content)
+                                             .Where(x => x.WithoutExtension())
+                                             .Select(x => x.ToAbsoluteUri(uri)).ToArray();
+                    currentDepth++;
+                    foreach (var s in sites)
+                    {
+                        ExecuteInternal(client, s, extensions, directory, maxDepth, currentDepth);
+                    }
+                }
+            }
+        }
+
+        private static string PrepareDirectory(string directory, int currentDepth)
+        {
             var currentDirectory = currentDepth == 0
                                        ? directory
                                        : Path.Combine(directory, string.Format("depth_{0}", currentDepth));
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);
+            return currentDirectory;
+        }
 
-            Console.WriteLine(@"[depth {0}]: ""{1}""...", currentDepth, source);
-            Download(client, resources, currentDirectory);
-
-            if (maxDepth < 0 || currentDepth < maxDepth)
+        private string DownloadString(WebClient client, string uri, int currentDepth)
+        {
+            try
             {
-                var sites = ContentParser.ExtractUris(content)
-                                         .Where(x => x.WithoutExtension())
-                                         .Select(x => x.ToAbsoluteUri(source)).ToArray();
-                ++currentDepth;
-                foreach (var uri in sites)
-                {
-                    ExecuteInternal(client, uri, extensions, directory, maxDepth, currentDepth);
-                }
+                Console.WriteLine(@"[depth {0}]: ""{1}""...", currentDepth, uri);
+                return client.DownloadString(uri);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: {0}", ex.Message);
+                return null;
             }
         }
 
-        private void Download(WebClient client, string[] uris, string directory)
+        private void DownloadFiles(WebClient client, string[] uris, string directory)
         {
             var i = -1;
             foreach (var uri in uris)
@@ -68,9 +88,9 @@ namespace webget
                     Console.WriteLine(@"[{0}]: downloading ""{1}""...", i, name);
                     client.DownloadFile(uri, path);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("error: {0}", e.Message);
+                    Console.WriteLine("error: {0}", ex.Message);
                 }
             }
         }

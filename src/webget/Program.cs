@@ -21,7 +21,8 @@ namespace webget
         {
             try
             {
-                var arg = new Argument(args);
+                var arg = new Argument();
+                arg.Build(args);
                 if (arg.Help)
                 {
                     PrintHelp();
@@ -29,7 +30,7 @@ namespace webget
                 }
                 
                 var getter = new Getter {ProxyData = arg.ProxyData, UserAgent = arg.UserAgent};
-                getter.Execute(arg.Source, arg.Extensions, arg.SaveDirectory ?? AssemblyDirectory, arg.RecursionDepth);
+                getter.Execute(arg.Url, arg.Extensions, arg.SaveDirectory ?? AssemblyDirectory, arg.RecursionDepth);
             }
             catch (ApplicationException ex)
             {
@@ -54,11 +55,11 @@ namespace webget
             Console.WriteLine(@"webget: get files from web");
             Console.WriteLine(@"usage: webget [options]... [url]...");
             Console.WriteLine();
-            Console.WriteLine(@"example: webget -e mp3,ogg http://www.astronomycast.com/archive/");
+            Console.WriteLine(@"example: webget -e mp3,aac http://www.astronomycast.com/archive/");
             Console.WriteLine();
             Console.WriteLine(@"options: ");
             Console.WriteLine(@"  -e, --extensions=LIST                         comma-separated list of accepted extensions");
-            Console.WriteLine(@"  -p, --proxy-settings=(user:pass@)ip(:port)    proxy settings if required");
+            Console.WriteLine(@"  -p, --proxy-settings=(user:pass@)ip(:port)    proxy settings (if required)");
             Console.WriteLine(@"  -s, --save-directory=PATH                     download directory");
             Console.WriteLine(@"  -r, --recursion-depth=LEVEL                   max recursion depth - default: 0, infinity: -1");
             Console.WriteLine(@"  -u, --user-agent=NAME                         User-Agent HTTP field spoof value,");
@@ -76,7 +77,7 @@ namespace webget
 
         private static void PrintError(string message)
         {
-            Console.WriteLine("webget: " + message);
+            Console.WriteLine("error: " + message);
         }
     }
 }

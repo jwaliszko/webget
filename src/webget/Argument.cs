@@ -13,7 +13,7 @@ namespace webget
             Extensions = new string[0];
         }
 
-        public string Source { get; private set; }
+        public string Url { get; private set; }
         public string UserAgent { get; private set; }
         public string SaveDirectory { get; private set; }
         public int RecursionDepth { get; private set; }
@@ -21,8 +21,7 @@ namespace webget
         public string[] Extensions { get; private set; }
         public ProxySettings ProxyData { get; private set; }
 
-        public Argument(IEnumerable<string> args)
-            : this()
+        public void Build(IEnumerable<string> args)
         {
             var argStack = new Queue<string>(args);
             while (argStack.Any())
@@ -37,13 +36,13 @@ namespace webget
                     case "-e":
                     case "--extensions":
                         if (!argStack.Any())
-                            throw new ApplicationException(ValueExpected("extensions"));
+                            throw new ApplicationException(ValueExpected(arg));
                         Extensions = argStack.Dequeue().Split(',');
                         break;
                     case "-p":
                     case "--proxy-settings":
                         if (!argStack.Any())
-                            throw new ApplicationException(ValueExpected("proxy-settings"));
+                            throw new ApplicationException(ValueExpected(arg));
                         var regex = new Regex(@"((?<user>\w+):(?<pass>\w+)@)?(?<ip>(\d{1,3}\.){3}\d{1,3})(:(?<port>\d{1,5}))?");                        
                         /* explanation of (\w+:\w+@)?(\d{1,3}\.){3}\d{1,3}(:\d{1,5})? (above version is exactly the same but with group names)
                          * (http://(\w+:\w+@)?)? - optional group of user:pass@
@@ -53,7 +52,7 @@ namespace webget
                          */
                         var match = regex.Match(argStack.Dequeue());
                         if(!match.Success)
-                            throw new ApplicationException(ValueInvalid("proxy-settings", ", try `[user:pass@]host[:port]`"));
+                            throw new ApplicationException(ValueInvalid(arg, ", try `[user:pass@]host[:port]`"));
                         ProxyData = new ProxySettings
                             {
                                 Host = match.Groups["ip"].Value,
@@ -62,39 +61,41 @@ namespace webget
                                 AuthPassword = match.Groups["pass"].Value,
                                 AuthRequired = match.Groups["user"].Success && match.Groups["pass"].Success
                             };
-                        break;                    
+                        break;
                     case "-s":
                     case "--save-directory":
                         if (!argStack.Any())
-                            throw new ApplicationException(ValueExpected("save-directory"));
+                            throw new ApplicationException(ValueExpected(arg));
                         SaveDirectory = argStack.Dequeue();
                         break;
                     case "-r":
                     case "--recursion-depth":
                         if (!argStack.Any())
-                            throw new ApplicationException(ValueExpected("recursion-depth"));
+                            throw new ApplicationException(ValueExpected(arg));
                         int level;
                         var result = int.TryParse(argStack.Dequeue(), out level);
                         if(!result || level < -1)
-                            throw new ApplicationException(ValueInvalid("recursion-depth"));
+                            throw new ApplicationException(ValueInvalid(arg));
                         RecursionDepth = level;
                         break;
                     case "-u":
                     case "--user-agent":
                         if (!argStack.Any())
-                            throw new ApplicationException(ValueExpected("user-agent"));
+                            throw new ApplicationException(ValueExpected(arg));
                         UserAgent = argStack.Dequeue();
                         break;
                     default:
-                        if (Source != null)
+                        if (Url != null)
                             throw new ApplicationException("unexpected argument: " + arg);
-                        Source = arg;
+                        if (!Uri.IsWellFormedUriString(arg, UriKind.RelativeOrAbsolute))
+                            throw new ApplicationException(ValueInvalid("url"));
+                        Url = arg;
                         break;
                 }
             }
             if (Help)
                 return;
-            if (Source == null)
+            if (Url == null)
                 throw new ApplicationException(ArgumentMissing("url"));
             if (!Extensions.Any())
                 throw new ApplicationException(ArgumentMissing("extensions list"));
