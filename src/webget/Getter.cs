@@ -27,7 +27,9 @@ namespace webget
                                          .Where(x => x.EndsWithAny(extensions))
                                          .Select(x => x.ToAbsoluteUri(source)).ToArray();
 
-            var currentDirectory = Path.Combine(directory, string.Format("depth_{0}", currentDepth));
+            var currentDirectory = currentDepth == 0
+                                       ? directory
+                                       : Path.Combine(directory, string.Format("depth_{0}", currentDepth));
             if (!Directory.Exists(currentDirectory))
                 Directory.CreateDirectory(currentDirectory);
 
