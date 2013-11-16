@@ -16,6 +16,7 @@ namespace webget
         public string Source { get; private set; }
         public string UserAgent { get; private set; }
         public string SaveDirectory { get; private set; }
+        public int RecursionDepth { get; private set; }
         public bool Help { get; private set; }
         public string[] Extensions { get; private set; }
         public ProxySettings ProxyData { get; private set; }
@@ -36,23 +37,23 @@ namespace webget
                     case "-e":
                     case "--extensions":
                         if (!argStack.Any())
-                            throw new ApplicationException("accepted extensions expected");
+                            throw new ApplicationException(ValueExpected("extensions"));
                         Extensions = argStack.Dequeue().Split(',');
                         break;
                     case "-p":
-                    case "--proxy":
+                    case "--proxy-settings":
                         if (!argStack.Any())
-                            throw new ApplicationException("proxy setting expected");
-                        var r = new Regex(@"((?<user>\w+):(?<pass>\w+)@)?(?<ip>(\d{1,3}\.){3}\d{1,3})(:(?<port>\d{1,5}))?");                        
+                            throw new ApplicationException(ValueExpected("proxy-settings"));
+                        var regex = new Regex(@"((?<user>\w+):(?<pass>\w+)@)?(?<ip>(\d{1,3}\.){3}\d{1,3})(:(?<port>\d{1,5}))?");                        
                         /* explanation of (\w+:\w+@)?(\d{1,3}\.){3}\d{1,3}(:\d{1,5})? (above version is exactly the same but with group names)
                          * (http://(\w+:\w+@)?)? - optional group of user:pass@
                          * (\d{1,3}\.){3} - three groups of one to three digits followed by a dot
                          * \d{1,3} - one to three digits
                          * (:\d{1,5})? - optional group of colon followed by one to five digits
                          */
-                        var match = r.Match(argStack.Dequeue());
+                        var match = regex.Match(argStack.Dequeue());
                         if(!match.Success)
-                            throw new ApplicationException("invalid format for proxy settings, try `[user:pass@]host[:port]`");
+                            throw new ApplicationException(ValueInvalid("proxy-settings", ", try `[user:pass@]host[:port]`"));
                         ProxyData = new ProxySettings
                             {
                                 Host = match.Groups["ip"].Value,
@@ -61,18 +62,28 @@ namespace webget
                                 AuthPassword = match.Groups["pass"].Value,
                                 AuthRequired = match.Groups["user"].Success && match.Groups["pass"].Success
                             };
+                        break;                    
+                    case "-s":
+                    case "--save-directory":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected("save-directory"));
+                        SaveDirectory = argStack.Dequeue();
+                        break;
+                    case "-r":
+                    case "--recursion-depth":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected("recursion-depth"));
+                        int level;
+                        var result = int.TryParse(argStack.Dequeue(), out level);
+                        if(!result || level < -1)
+                            throw new ApplicationException(ValueInvalid("recursion-depth"));
+                        RecursionDepth = level;
                         break;
                     case "-u":
                     case "--user-agent":
                         if (!argStack.Any())
-                            throw new ApplicationException("puser agent identifier expected");
+                            throw new ApplicationException(ValueExpected("user-agent"));
                         UserAgent = argStack.Dequeue();
-                        break;
-                    case "-s":
-                    case "--save-directory":
-                        if (!argStack.Any())
-                            throw new ApplicationException("output directory path not provided");
-                        SaveDirectory = argStack.Dequeue();
                         break;
                     default:
                         if (Source != null)
@@ -84,9 +95,24 @@ namespace webget
             if (Help)
                 return;
             if (Source == null)
-                throw new ApplicationException("url argument missing");
+                throw new ApplicationException(ArgumentMissing("url"));
             if (!Extensions.Any())
-                throw new ApplicationException("accepted extensions argument missing ");
+                throw new ApplicationException(ArgumentMissing("extensions list"));
+        }
+
+        private string ValueExpected(string argument)
+        {
+            return string.Format("value for option `{0}` expected", argument);
+        }
+
+        private string ValueInvalid(string argument, string advice = null)
+        {
+            return string.Format("value for option `{0}` invalid{1}", argument, advice);
+        }
+
+        private string ArgumentMissing(string argument)
+        {
+            return string.Format("`{0}` argument missing", argument);
         }
     }
 }

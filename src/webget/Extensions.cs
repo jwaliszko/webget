@@ -36,6 +36,11 @@ namespace webget
                                        StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool WithoutExtension(this string path)
+        {
+            return string.IsNullOrEmpty(Path.GetExtension(path));
+        }
+
         public static bool Contains(this string[] target, string value, StringComparison comparison)
         {
             return target.ToList().FindAll(x => x.Equals(value, comparison)).Count > 0;
