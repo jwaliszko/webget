@@ -5,8 +5,8 @@ webget: get files from web
 usage: webget [options]... [url]...
 
 examples:
-  webget -e mp3 http://www.astronomycast.com/archive/
-  webget -e jpg,png http://www.reddit.com/r/earthporn -r 10 -d earthporn -gt 1mb -lt 20mb -t /earthporn/\?count.*after -l
+  webget -e mp3,aac http://www.astronomycast.com/archive/
+  webget -e jpg,png http://www.reddit.com/r/space -r 10 -d space -gt 1mb -lt 20mb -t /space/\?count.*after -l
 
 options:
   -e,  --extensions=LIST                         comma-separated list of accepted extensions

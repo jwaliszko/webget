@@ -60,8 +60,8 @@ namespace webget
             Console.WriteLine(@"usage: webget [options]... [url]...");
             Console.WriteLine();
             Console.WriteLine(@"examples:");
-            Console.WriteLine(@"  webget -e mp3 http://www.astronomycast.com/archive/");
-            Console.WriteLine(@"  webget -e jpg,png http://www.reddit.com/r/earthporn -r 10 -d earthporn -gt 1mb -lt 20mb -t /earthporn/\?count.*after -l");
+            Console.WriteLine(@"  webget -e mp3,aac http://www.astronomycast.com/archive/");
+            Console.WriteLine(@"  webget -e jpg,png http://www.reddit.com/r/space -r 10 -d space -gt 1mb -lt 20mb -t /space/\?count.*after -l");
             Console.WriteLine();
             Console.WriteLine(@"options: ");
             Console.WriteLine(@"  -e,  --extensions=LIST                         comma-separated list of accepted extensions");
