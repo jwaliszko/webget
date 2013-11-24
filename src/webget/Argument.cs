@@ -17,6 +17,7 @@ namespace webget
         public string UserAgent { get; private set; }
         public string SaveDirectory { get; private set; }
         public string RecursionTarget { get; private set; }
+        public string NameFilter { get; private set; }
         public int RecursionDepth { get; private set; }
         public int GreaterThan { get; private set; }
         public int LessThan { get; private set; } 
@@ -109,6 +110,12 @@ namespace webget
                     case "-l":
                     case "--link-label":
                         LinkLabel = true;
+                        break;
+                    case "-n":
+                    case "--name-filter":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected(arg));
+                        NameFilter = argStack.Dequeue();
                         break;
                     default:
                         if (Url != null)

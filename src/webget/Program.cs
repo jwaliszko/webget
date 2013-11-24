@@ -40,7 +40,8 @@ namespace webget
                         GreaterThan = arg.GreaterThan,
                         LessThan = arg.LessThan,
                         RecursionTarget = arg.RecursionTarget,
-                        LinkLabel = arg.LinkLabel
+                        LinkLabel = arg.LinkLabel,
+                        NameFilter = arg.NameFilter
                     };
                 getter.Execute();
             }
@@ -70,6 +71,7 @@ namespace webget
             Console.WriteLine(@"  -r,  --recursion-depth=NUMBER                  max recursion depth - default: 0, infinity: -1");
             Console.WriteLine(@"  -t,  --recursion-target=PATTERN                regex url pattern to direct recursive search");
             Console.WriteLine(@"  -l,  --link-label                              replace resource name with link label if possible");
+            Console.WriteLine(@"  -n,  --name-filter=WORD                        resource name (or part of it) to be downloaded");
             Console.WriteLine(@"  -u,  --user-agent=NAME                         User-Agent HTTP field spoof value,");
             Console.WriteLine(@"                                                 e.g. ""Links (0.96; Linux 2.4.20-18.7 i586)""");
             Console.WriteLine(@"  -gt, --greater-than=NUMBER[kb|mb]              upper file size boundary, no extent means bytes");

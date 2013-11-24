@@ -17,12 +17,13 @@ namespace webget
         public string RecursionTarget { get; set; }
         public string Uri { get; set; }
         public string SaveDirectory { get; set; }
+        public string NameFilter { get; set; }
         public string[] Extensions { get; set; }
         public int GreaterThan { get; set; }
         public int LessThan { get; set; }
         public int RecursionDepth { get; set; }
-        public bool LinkLabel { get; set; }
-        
+        public bool LinkLabel { get; set; }        
+
         public void Execute()
         {
             if (!Directory.Exists(SaveDirectory))
@@ -91,6 +92,11 @@ namespace webget
                 var name = LinkLabel && !string.IsNullOrEmpty(uri.Label)
                                ? string.Format("{0}.{1}", uri.Label, uri.Value.Split('.').Last())
                                : uri.Value.Split('/').Last();
+
+                if (!string.IsNullOrEmpty(NameFilter) &&
+                    !name.Contains(NameFilter, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 var path = Path.Combine(directory, name);
                 if (File.Exists(path))
                 {

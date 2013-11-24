@@ -15,6 +15,7 @@ options:
   -r,  --recursion-depth=NUMBER                  max recursion depth - default: 0, infinity: -1
   -t,  --recursion-target=PATTERN                regex url pattern to direct recursive search
   -l,  --link-label                              replace resource name with link label if possible
+  -n,  --name-filter=WORD                        resource name (or part of it) to be downloaded
   -u,  --user-agent=NAME                         User-Agent HTTP field spoof value,
                                                  e.g. "Links (0.96; Linux 2.4.20-18.7 i586)"
   -gt, --greater-than=NUMBER[kb|mb]              upper file size boundary, no extent means bytes
