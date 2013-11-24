@@ -16,10 +16,14 @@ namespace webget
         public string Url { get; private set; }
         public string UserAgent { get; private set; }
         public string SaveDirectory { get; private set; }
+        public string RecursionTarget { get; private set; }
         public int RecursionDepth { get; private set; }
+        public int GreaterThan { get; private set; }
+        public int LessThan { get; private set; } 
         public bool Help { get; private set; }
+        public bool LinkLabel { get; private set; }
         public string[] Extensions { get; private set; }
-        public ProxySettings ProxyData { get; private set; }
+        public ProxySettings ProxyData { get; private set; }               
 
         public void Build(IEnumerable<string> args)
         {
@@ -27,7 +31,7 @@ namespace webget
             while (argStack.Any())
             {
                 var arg = argStack.Dequeue();
-                switch (arg.ToLower())
+                switch (arg.ToLowerInvariant())
                 {
                     case "-h":
                     case "--help":
@@ -56,13 +60,13 @@ namespace webget
                         ProxyData = new ProxySettings
                             {
                                 Host = match.Groups["ip"].Value,
-                                Port = match.Groups["port"].Success ? int.Parse(match.Groups["port"].Value) : (int?) null,
+                                Port = match.Groups["port"].Success ? int.Parse(match.Groups["port"].Value) : (int?)null,
                                 AuthUsername = match.Groups["user"].Value,
                                 AuthPassword = match.Groups["pass"].Value,
                                 AuthRequired = match.Groups["user"].Success && match.Groups["pass"].Success
                             };
                         break;
-                    case "-s":
+                    case "-d":
                     case "--save-directory":
                         if (!argStack.Any())
                             throw new ApplicationException(ValueExpected(arg));
@@ -84,11 +88,33 @@ namespace webget
                             throw new ApplicationException(ValueExpected(arg));
                         UserAgent = argStack.Dequeue();
                         break;
+                    case "-gt":
+                    case "--greater-than":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected(arg));
+                        GreaterThan = GetSize(argStack.Dequeue());
+                        break;
+                    case "-lt":
+                    case "--less-than":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected(arg));
+                        LessThan = GetSize(argStack.Dequeue());
+                        break;
+                    case "-t":
+                    case "--recursion-target":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected(arg));
+                        RecursionTarget = argStack.Dequeue();
+                        break;
+                    case "-l":
+                    case "--link-label":
+                        LinkLabel = true;
+                        break;
                     default:
                         if (Url != null)
                             throw new ApplicationException("unexpected argument: " + arg);
-                        if (!Uri.IsWellFormedUriString(arg, UriKind.RelativeOrAbsolute))
-                            throw new ApplicationException(ValueInvalid("url"));
+                        if (!Uri.IsWellFormedUriString(arg, UriKind.Absolute))
+                            throw new ApplicationException(ValueInvalid("url", ", remember to provide absolute url"));
                         Url = arg;
                         break;
                 }
@@ -99,6 +125,25 @@ namespace webget
                 throw new ApplicationException(ArgumentMissing("url"));
             if (!Extensions.Any())
                 throw new ApplicationException(ArgumentMissing("extensions list"));
+        }
+
+        private int GetSize(string arg)
+        {
+            var regex = new Regex(@"(?<size>\d+)(?<extent>kb|mb)?");
+            var match = regex.Match(arg);
+            if (!match.Success)
+                throw new ApplicationException(ValueInvalid(arg, ", try number with optional size extent"));
+            var size = int.Parse(match.Groups["size"].Value);
+            switch (match.Groups["extent"].Value)
+            {
+                case "kb":
+                    size *= 1000;
+                    break;
+                case "mb":
+                    size *= 1000000;
+                    break;
+            }
+            return size;
         }
 
         private string ValueExpected(string argument)
