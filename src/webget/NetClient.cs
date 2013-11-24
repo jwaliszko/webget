@@ -5,8 +5,9 @@ namespace webget
 {
     internal class NetClient: WebClient
     {
-        public string UserAgent { get; set; }
         public ProxySettings ProxyData { get; set; }
+        public string UserAgent { get; set; }
+        public int RequestTimeout { get; set; }        
         public bool HeadOnly { get; set; }
 
         protected override WebRequest GetWebRequest(Uri address)
@@ -14,12 +15,17 @@ namespace webget
             if (ProxyData != null)
                 Proxify(this, ProxyData);
             if (!string.IsNullOrEmpty(UserAgent))
-                Headers.Add(HttpRequestHeader.UserAgent, UserAgent);
+                Headers.Add(HttpRequestHeader.UserAgent, UserAgent);            
 
             var req = base.GetWebRequest(address);
-            if (HeadOnly && req != null && req.Method == "GET")
+            if (req != null)
             {
-                req.Method = "HEAD";
+                if (HeadOnly && req.Method == "GET")
+                {
+                    req.Method = "HEAD";
+                }
+                if (RequestTimeout > 0)
+                    req.Timeout = RequestTimeout;
             }
 
             return req;

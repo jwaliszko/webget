@@ -22,14 +22,21 @@ namespace webget
         public int GreaterThan { get; set; }
         public int LessThan { get; set; }
         public int RecursionDepth { get; set; }
-        public bool LinkLabel { get; set; }        
+        public int RequestTimeout { get; set; }
+        public bool LinkLabel { get; set; }
 
         public void Execute()
         {
             if (!Directory.Exists(SaveDirectory))
                 Directory.CreateDirectory(SaveDirectory);
 
-            using (var client = new NetClient {ProxyData = ProxyData, Encoding = Encoding.UTF8, UserAgent = UserAgent})
+            using (var client = new NetClient
+                {
+                    ProxyData = ProxyData,
+                    Encoding = Encoding.UTF8,
+                    UserAgent = UserAgent,
+                    RequestTimeout = RequestTimeout
+                })
             {
                 ExecuteInternal(client, Uri, Extensions, SaveDirectory, RecursionDepth);
             }
@@ -94,7 +101,7 @@ namespace webget
                                : uri.Value.Split('/').Last();
 
                 if (!string.IsNullOrEmpty(NameFilter) &&
-                    !name.Contains(NameFilter, StringComparison.OrdinalIgnoreCase))
+                    !(new Regex(NameFilter, RegexOptions.IgnoreCase)).IsMatch(name))
                     continue;
 
                 var path = Path.Combine(directory, name);

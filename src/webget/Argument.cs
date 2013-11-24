@@ -20,7 +20,8 @@ namespace webget
         public string NameFilter { get; private set; }
         public int RecursionDepth { get; private set; }
         public int GreaterThan { get; private set; }
-        public int LessThan { get; private set; } 
+        public int LessThan { get; private set; }
+        public int RequestTimeout { get; private set; } 
         public bool Help { get; private set; }
         public bool LinkLabel { get; private set; }
         public string[] Extensions { get; private set; }
@@ -78,8 +79,7 @@ namespace webget
                         if (!argStack.Any())
                             throw new ApplicationException(ValueExpected(arg));
                         int level;
-                        var result = int.TryParse(argStack.Dequeue(), out level);
-                        if(!result || level < -1)
+                        if(!int.TryParse(argStack.Dequeue(), out level) || level < -1)
                             throw new ApplicationException(ValueInvalid(arg));
                         RecursionDepth = level;
                         break;
@@ -116,6 +116,15 @@ namespace webget
                         if (!argStack.Any())
                             throw new ApplicationException(ValueExpected(arg));
                         NameFilter = argStack.Dequeue();
+                        break;
+                    case "-o":
+                    case "--request-timeout":
+                        if (!argStack.Any())
+                            throw new ApplicationException(ValueExpected(arg));
+                        int timeout;
+                        if (!int.TryParse(argStack.Dequeue(), out timeout) || timeout < -1)
+                            throw new ApplicationException(ValueInvalid(arg));
+                        RequestTimeout = timeout;
                         break;
                     default:
                         if (Url != null)

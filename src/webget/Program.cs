@@ -41,7 +41,8 @@ namespace webget
                         LessThan = arg.LessThan,
                         RecursionTarget = arg.RecursionTarget,
                         LinkLabel = arg.LinkLabel,
-                        NameFilter = arg.NameFilter
+                        NameFilter = arg.NameFilter,
+                        RequestTimeout = arg.RequestTimeout
                     };
                 getter.Execute();
             }
@@ -57,21 +58,22 @@ namespace webget
 
         private static void PrintHelp()
         {
-            Console.WriteLine(@"webget: get files from web");
+            Console.WriteLine(@"webget: get files from websites");
             Console.WriteLine(@"usage: webget [options]... [url]...");
             Console.WriteLine();
             Console.WriteLine(@"examples:");
             Console.WriteLine(@"  webget -e mp3,aac http://www.astronomycast.com/archive/");
-            Console.WriteLine(@"  webget -e jpg,png http://www.reddit.com/r/space -r 10 -d space -gt 1mb -lt 20mb -t /space/\?count.*after -l");
+            Console.WriteLine(@"  webget -e jpg http://www.reddit.com/r/space -r 20 -d space -gt 500kb -t ""\?count.*after"" -n ""mars|moon"" -l");
             Console.WriteLine();
             Console.WriteLine(@"options: ");
             Console.WriteLine(@"  -e,  --extensions=LIST                         comma-separated list of accepted extensions");
             Console.WriteLine(@"  -p,  --proxy-settings=(user:pass@)ip(:port)    proxy settings (if required)");
             Console.WriteLine(@"  -d,  --save-directory=PATH                     download directory");
             Console.WriteLine(@"  -r,  --recursion-depth=NUMBER                  max recursion depth - default: 0, infinity: -1");
-            Console.WriteLine(@"  -t,  --recursion-target=PATTERN                regex url pattern to direct recursive search");
+            Console.WriteLine(@"  -t,  --recursion-target=REGEX                  regex url pattern to direct recursive search");
             Console.WriteLine(@"  -l,  --link-label                              replace resource name with link label if possible");
-            Console.WriteLine(@"  -n,  --name-filter=WORD                        resource name (or part of it) to be downloaded");
+            Console.WriteLine(@"  -n,  --name-filter=REGEX                       regex resource name to be downloaded");
+            Console.WriteLine(@"  -o,  --request-timeout=NUMBER                  request timeout in miliseconds before abort");
             Console.WriteLine(@"  -u,  --user-agent=NAME                         User-Agent HTTP field spoof value,");
             Console.WriteLine(@"                                                 e.g. ""Links (0.96; Linux 2.4.20-18.7 i586)""");
             Console.WriteLine(@"  -gt, --greater-than=NUMBER[kb|mb]              upper file size boundary, no extent means bytes");
