@@ -1,4 +1,4 @@
-#webget
+# webget
 
 ```
 webget: get files from websites
@@ -23,3 +23,9 @@ options:
   -lt, --less-than=NUMBER[kb|mb]                 lower file size boundary, no extent means bytes
   -h,  --help                                    print this help
 ```
+
+### <a id="license">License</a>
+
+Copyright (c) 2013 Jarosław Waliszko
+
+Licensed MIT: http://opensource.org/licenses/MIT
